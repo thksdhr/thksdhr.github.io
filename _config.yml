@@ -4,12 +4,12 @@
 
 # Site
 title: taoziGの博客
-subtitle: '平平无奇的博客~'
+subtitle: 'Blogs~'
 description: '一个平平无奇的人搭建的平平无奇的博客~'
 keywords:
 author: taozig
 language: zh-CN
-timezone: ''
+timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
@@ -67,7 +67,9 @@ index_generator:
 # Category & Tag
 default_category: uncategorized
 category_map:
+  "服务器搭建教程": server-document
 tag_map:
+  "教程": document
 
 # Metadata elements
 ## https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta
@@ -96,6 +98,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
+#theme: landscape
 theme: next
 
 # Deployment
