@@ -59,7 +59,6 @@ systemctl enable node_exporter
 ```
 
 ### Step 2 ：创建 Prometheus、Alertmanager、Grafana的数据文件存放文件夹，及配置文件
-- 
 ```
 # prometheus
 mkdir -p /data/MonitoringSystem/prometheus/data
@@ -82,7 +81,7 @@ touch /data/SimpleMonitor/.env
 ```
 
 ### Step 3 ：编辑Prometheus的配置文件
-- prometheus.yml 这是主配置文件
+- prometheus.yml (主配置文件)
 ```
 global:
   scrape_interval: 15s # 数据采集频率
@@ -103,7 +102,7 @@ scrape_configs:
     static_configs:
       - targets: ["192.168.40.190:9100"]
 ```
-- lifecycle.rules.yml 这是一个规则配置文件，这里只是一个实例掉线检测的示例，详细编写教程可以移步[官方文档](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+- lifecycle.rules.yml (规则配置文件) 这是一个实例掉线检测的示例，详细编写教程可以移步[官方文档](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 ```
 groups:
 - name: HeartRateMonitoring
@@ -120,7 +119,7 @@ groups:
 ```
 
 ### Step 4 ：编辑Alertmanager配置文件
-- alertmanager.yml 这是主配置文件
+- alertmanager.yml (主配置文件)
 ```
 global:
   resolve_timeout: 5m # 报警超时时间，如果超时未收到后续信息，则判定为已解决
@@ -147,7 +146,7 @@ receivers:
     email_configs:
       - to: "123@qq.com"
 ```
-- email.tmpl 这是邮件的格式配置文件，默认邮件发送会使用这个配置文件
+- email.tmpl (邮件格式配置文件) 默认邮件发送会使用这个配置文件
 ```
 {{ define "email.default.html" }}
 {{ range $i, $alert :=.Alerts }}
@@ -166,7 +165,7 @@ receivers:
 ```
 
 ### Step 5 ：编辑 docker compose 文件和 .env 文件
-- compose.yml
+- compose.yml (docker compose 配置文件)
 ```
 services:
     prometheus:
@@ -226,7 +225,7 @@ networks:
                 - subnet: ${SUBNET_PREFIX:?SUBNET_PREFIX required}.0/24
                   gateway: ${SUBNET_PREFIX:?SUBNET_PREFIX required}.1
 ```
-- .env 这个是环境变量配置文件，用于配置IP网段的，如果修改了网段需要去修改prometheus、alertmanager、grafana配置文件或者软件配置中的IP
+- .env (环境变量文件) 用于配置IP网段的，如果修改了网段需要去修改prometheus、alertmanager、grafana配置文件或者软件配置中的IP
 ```
 SUBNET_PREFIX=192.168.123
 ```
