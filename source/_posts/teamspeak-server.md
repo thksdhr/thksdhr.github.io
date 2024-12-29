@@ -2,7 +2,7 @@
 title: Teamspeak服务器搭建教程
 date: 2024-10-24 11:04:14
 categories:
-    - 服务器搭建教程
+    - 内容分享
 tags:
     - 教程
 ---

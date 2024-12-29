@@ -5,16 +5,22 @@ categories:
     - 内容分享
 tags:
     - 教程
+    - 服务部署
 ---
 
 # 搭建一个监控系统，实现可视化数据监控、自动报警(prometheus+alertmanager+grafana)
 prometheus是一个很强大的数据监控软件，结合alertmanager实现自动报警，然后搭配grafana的仪表盘功能作为监控，可以组成一个简单实用的服务器监控系统，本教程将教会你如何去搭建这样一套系统。
+Tips: 本教程中关于软件的一些配置文件不会深入去讲解，想要深入探索的我也会附上官方文档的链接。
+
+---
 
 ### 准备工作
 - docker & docker compose
 > 本次搭建的系统除node_exporter以外的服务都将使用docker compose来部署，所以需要自行准备好docker
 - 安装包: node_exporter & docker镜像: prom/prometheus prom/alertmanager grafana/grafana
 > node_exporter 安装包可去[prometheus官网](https://prometheus.io/download/)下载，docker镜像自行拉取即可
+
+---
 
 ### Step 1 ：为需要监控的主机安装 node_exporter
 - 创建程序文件夹，并解压 node_exporter 到创建的文件夹中
@@ -81,7 +87,7 @@ touch /data/SimpleMonitor/.env
 ```
 
 ### Step 3 ：编辑Prometheus的配置文件
-- prometheus.yml (主配置文件)
+- prometheus.yml (主配置文件) [官方文档](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
 ```
 global:
   scrape_interval: 15s # 数据采集频率
@@ -97,12 +103,12 @@ scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
-  # 这是一个抓取数据的任务，可以自定义名称，下方的targets是一个抓取节点，9100是node_exporter的默认端口
+  # 这是一个抓取数据的任务，可以自定义名称，下方的targets是一个抓取节点，一个任务可以有多个节点
   - job_name: node_self
     static_configs:
-      - targets: ["192.168.40.190:9100"]
+      - targets: ["192.168.40.190:9100"] # 这里是被采集主机的IP+端口，9100是node_exporter的默认端口
 ```
-- lifecycle.rules.yml (规则配置文件) 这是一个实例掉线检测的示例，详细编写教程可以移步[官方文档](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+- lifecycle.rules.yml (规则配置文件) 这是一个实例掉线检测的示例，详细编写教程可以移步 [官方文档](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 ```
 groups:
 - name: HeartRateMonitoring
@@ -119,7 +125,7 @@ groups:
 ```
 
 ### Step 4 ：编辑Alertmanager配置文件
-- alertmanager.yml (主配置文件)
+- alertmanager.yml (主配置文件) [官方文档](https://prometheus.io/docs/alerting/latest/configuration/)
 ```
 global:
   resolve_timeout: 5m # 报警超时时间，如果超时未收到后续信息，则判定为已解决
@@ -146,7 +152,7 @@ receivers:
     email_configs:
       - to: "123@qq.com"
 ```
-- email.tmpl (邮件格式配置文件) 默认邮件发送会使用这个配置文件
+- email.tmpl (邮件格式配置文件) 默认邮件发送会使用这个配置文件 [官方文档](https://prometheus.io/docs/alerting/latest/notification_examples/)
 ```
 {{ define "email.default.html" }}
 {{ range $i, $alert :=.Alerts }}
@@ -225,7 +231,7 @@ networks:
                 - subnet: ${SUBNET_PREFIX:?SUBNET_PREFIX required}.0/24
                   gateway: ${SUBNET_PREFIX:?SUBNET_PREFIX required}.1
 ```
-- .env (环境变量文件) 用于配置IP网段的，如果修改了网段需要去修改prometheus、alertmanager、grafana配置文件或者软件配置中的IP
+- .env (环境变量文件) 用于配置IP网段的，如果修改了网段需要去修改prometheus、alertmanager、grafana配置文件或者软件配置中的IP，如果不能理解compose.yml文件的话请勿改动此文件
 ```
 SUBNET_PREFIX=192.168.123
 ```
@@ -248,4 +254,5 @@ docker compose logs -f alertmanager
 - 找到仪表盘 > 新建 > 导入 > 输入ID: 1860 （可以[自行选择](https://grafana.com/grafana/dashboards/)合适的面版） > 数据源选择上一步新增的即可
 
 ### 至此整个监控系统的搭建就全部完成了
+{% asset_img "grafana-example.png" "Grafana示例图片" %}
 ## end
