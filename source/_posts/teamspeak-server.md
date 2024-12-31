@@ -8,25 +8,96 @@ tags:
     - 教程
 ---
 
-# [TeamSpeak](https://www.teamspeak.com/zh-CN/)服务器搭建教程
-teamspeak是一个非常简洁的语音聊天软件，它很干净小巧，能够来看这篇文章，说明你也对于搭建一个自己的teamspeak服务器有想法，本程将详细的教会你如何搭建一个属于你自己的teamspeak服务器~
-
-***
-
 ### 准备工作
-- *服务器*
-> 必要的，想要拥有一个稳定的teamspeak服务器，你首先得拥有一台服务器主机~
-- *Teamspeak Server*
-> 必要的（如果直接运行服务器程序），点击此处去官方网站下载服务器程序：[teamspeak-server](https://www.teamspeak.com/zh-CN/downloads/#server)
+- *一台服务器（或一台电脑）*
+> 想要拥有一个稳定的teamspeak服务器，你首先得拥有一台服务器主机~
 - *Docker*
-> 必要的（如果使用docker部署），我推荐使用Docker来部署teamspeak服务器，这将更加方便快捷~
-- *Mariadb*
-> 非必要，使用mariadb可以更加方便的管理你的数据。
-> 如果你的服务器人数较多时，为了更好的性能表现，使用数据库是必要的。
+> 推荐使用Docker来部署teamspeak服务器，这将更加方便快捷~
 
 本教程只针对与TeamSpeak Server的搭建，并不会涵盖其它内容例如：Docker、内网穿透。
 
 ***
 
-### 使用官方程序搭建服务器
-1. 将准备工作中下载好的服务器解压到你需要的位置
+### Step 1: 拉取镜像
+```
+docker pull teamspeak:latest
+```
+
+### Step 2: 编写 `compose.yaml` 文件
+- 创建一个文件夹作为`teamspeak server`的数据文件夹，并在该文件夹中创建一个名为 `compose.yaml` 的文件。
+```
+mkdir -p /data/teamspeak
+cd /data/teamspeak
+touch compose.yaml
+```
+- 在 `compose.yaml` 文件中写入以下内容：
+```
+services:
+  teamspeak:
+    container_name: my-teamspeak
+    image: teamspeak:latest
+    restart: always
+    ports:
+      - 9987:9987/udp
+      - 10011:10011
+      - 30033:30033
+    volumes:
+      - ./data:/var/ts3server/
+    environment:
+      TS3SERVER_DB_PLUGIN: ts3db_sqlite3
+      TS3SERVER_DB_SQLCREATEPATH: create_sqlite
+      TS3SERVER_LICENSE: accept
+```
+- 关于 `compose.yaml` 文件中各字段的解释：
+```
+TS3SERVER_DB_PLUGIN : 使用那种数据库插件，这里使用sqlite数据库 （还支持: postgresql、mariadb）
+TS3SERVER_DB_SQLCREATEPATH : sql文件路径,依据选择的数据库插件来确定，与TS3SERVER_DB_PLUGIN对应
+TS3SERVER_LICENSE : 接受TeamSpeak的许可协议
+
+# 如果使用的是 postgresql 或者 mariadb 数据库，请添加以下环境变量
+TS3SERVER_DB_HOST : 数据库主机地址
+TS3SERVER_DB_USER : 数据库连接账户
+TS3SERVER_DB_PASSWORD : 数据库连接密码
+TS3SERVER_DB_NAME : 数据库名称 （需要在数据库软件中自行建立）
+```
+
+### Step 3: 启动容器，并连接服务器
+- 启动容器，并让其在后台运行
+```
+docker compose up -d
+```
+- 查看容器日志，获取默认管理员账号密码以及服务器权限密钥
+```
+docker compose logs
+```
+- 默认管理员账号密码以及服务器权限密钥在日志中，请及时记录，否则将无法找回！
+- 日志中会有两个段落，第一个段落是默认管理员账号密码，第二个段落是服务器权限密钥。
+- 切记一定要自行复制保存好数据，下面是一个示例，你看到的日志应该和下面的类似：
+```
+| ------------------------------------------------------------------
+|                       I M P O R T A N T                           
+| ------------------------------------------------------------------
+|                Server Query Admin Account created                 
+|          loginname= "serveradmin", password= "5dLUj9J+"
+|          apikey= "BAAPh5f5biOPw5vnFp_u7esZoAJ5KxpvB6Zj0GZ"
+| ------------------------------------------------------------------
+
+
+| ------------------------------------------------------------------
+|                       I M P O R T A N T                           
+| ------------------------------------------------------------------
+|       ServerAdmin privilege key created, please use it to gain 
+|       serveradmin rights for your virtualserver. please
+|       also check the doc/privilegekey_guide.txt for details.
+| 
+|        token=hyCWSTHynIh9UhAjXqVl8eYchrChesFZflUd+beR
+| ------------------------------------------------------------------
+```
+- 打开TeamSpeak客户端，输入 `服务器的地址:9987` 来连接。
+- 连接服务器之后，右键服务器 -> 使用权限密钥 -> 输入日志中 `token=hyCWSTHynIh9UhAjXqVl8eYchrChesFZflUd+beR` 中的数据，然后点击 `确定`。
+- 查看你的头像下方是否有 `红色S` 标志，如果有，说明权限密钥已经成功应用，你现在是服务器管理员，剩下的就可以自行在客户端修改了。
+
+***
+
+### END
+- 至此，你已经成功安装并配置了TeamSpeak服务器，并获得了管理员权限。你可以开始使用你的服务器了！

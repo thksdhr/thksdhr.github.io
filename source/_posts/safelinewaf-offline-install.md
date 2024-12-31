@@ -8,12 +8,14 @@ tags:
     - 服务部署
 ---
 
-# 雷池WAF 离线部署
+
 
 ### 准备工作
 - docker 全家桶 (docker、docker-compose)
 - 雷池waf [离线镜像文件](https://demo.waf-ce.chaitin.cn/image.tar.gz)
 - 雷池waf [compose.yaml 文件](https://waf-ce.chaitin.cn/release/latest/compose.yaml)
+
+---
 
 ### Step 1: 创建安装目录，导入docker 镜像
 - 创建安装目录 （可根据需要自定义安装目录）
@@ -71,3 +73,4 @@ docker compose -f compose.yaml up -d
 docker exec safeline-mgt resetadmin
 ```
 ### END
+---
